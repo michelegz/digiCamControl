@@ -149,5 +149,15 @@ namespace CameraControl.Devices.Example
         {
             btn_stop_Click(null, null);
         }
+
+        private void FocusF10_Click(object sender, EventArgs e)
+        {
+            CameraDevice.Focus(100);
+        }
+
+        private void FocusNear10_Click(object sender, EventArgs e)
+        {
+            CameraDevice.Focus(100);
+        }
     }
 }

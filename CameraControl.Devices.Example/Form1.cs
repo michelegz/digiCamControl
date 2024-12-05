@@ -190,6 +190,7 @@ namespace CameraControl.Devices.Example
         private void btn_liveview_Click(object sender, EventArgs e)
         {
             LiveViewForm form = new LiveViewForm(DeviceManager.SelectedCameraDevice);
+            
             form.ShowDialog();
         }
 
@@ -219,5 +220,6 @@ namespace CameraControl.Devices.Example
             IWifiDeviceProvider wifiDeviceProvider = new PtpIpProvider();
             DeviceManager.AddDevice(wifiDeviceProvider.Connect("192.168.1.1"));
         }
+
     }
 }
