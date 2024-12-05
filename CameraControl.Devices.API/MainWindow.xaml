@@ -1,0 +1,22 @@
+﻿<Window x:Class="CameraControl.Devices.API.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CameraControl.Devices.API"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <ComboBox x:Name="DevicesComboBox1" HorizontalAlignment="Left" Margin="75,52,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="DevicesComboBox1_SelectionChanged"/>
+        <ComboBox x:Name="DevicesComboBox2" HorizontalAlignment="Left" Margin="75,79,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="DevicesComboBox2_SelectionChanged"/>
+        <Label Content="Camera 1&#xD;&#xA;" HorizontalAlignment="Left" Margin="10,47,0,0" VerticalAlignment="Top" Height="31"/>
+        <Label Content="Camera 2" HorizontalAlignment="Left" Margin="10,78,0,0" VerticalAlignment="Top" Height="31"/>
+        <TextBox x:Name="Port1TextBox" HorizontalAlignment="Left" Margin="218,54,0,0" TextWrapping="Wrap" Text="{Binding Port1, Mode=TwoWay}" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Port2TextBox" HorizontalAlignment="Left" Margin="218,81,0,0" TextWrapping="Wrap" Text="{Binding Port2, Mode=TwoWay}" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Path1TextBox" HorizontalAlignment="Left" Margin="343,54,0,0" TextWrapping="Wrap" Text="{Binding Path1, Mode=TwoWay}" VerticalAlignment="Top" Width="322"/>
+        <TextBox x:Name="Path2TextBox" HorizontalAlignment="Left" Margin="343,79,0,0" TextWrapping="Wrap" Text="{Binding Path2, Mode=TwoWay}" VerticalAlignment="Top" Width="322"/>
+        <TextBox x:Name="LogTextBox" HorizontalAlignment="Left" Margin="40,191,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="634" Height="171"/>
+        <Button x:Name="FocusClose2" Content="Button" HorizontalAlignment="Left" Margin="685,81,0,0" VerticalAlignment="Top" Click="FocusClose2_Click"/>
+        <Button x:Name="FocusFar2" Content="Button" HorizontalAlignment="Left" Margin="730,82,0,0" VerticalAlignment="Top" Click="FocusFar2_Click"/>
+    </Grid>
+</Window>
