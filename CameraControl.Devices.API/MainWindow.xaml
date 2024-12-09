@@ -4,19 +4,260 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CameraControl.Devices.API"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Style="{StaticResource MaterialDesignWindow}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="digiCamControl API Server" Height="600" Width="1024" Closing="Window_Closing">
     <Grid>
-        <ComboBox x:Name="DevicesComboBox1" HorizontalAlignment="Left" Margin="75,52,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="DevicesComboBox1_SelectionChanged"/>
-        <ComboBox x:Name="DevicesComboBox2" HorizontalAlignment="Left" Margin="75,79,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="DevicesComboBox2_SelectionChanged"/>
-        <Label Content="Camera 1&#xD;&#xA;" HorizontalAlignment="Left" Margin="10,47,0,0" VerticalAlignment="Top" Height="31"/>
-        <Label Content="Camera 2" HorizontalAlignment="Left" Margin="10,78,0,0" VerticalAlignment="Top" Height="31"/>
-        <TextBox x:Name="Port1TextBox" HorizontalAlignment="Left" Margin="218,54,0,0" TextWrapping="Wrap" Text="{Binding Port1, Mode=TwoWay}" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="Port2TextBox" HorizontalAlignment="Left" Margin="218,81,0,0" TextWrapping="Wrap" Text="{Binding Port2, Mode=TwoWay}" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="Path1TextBox" HorizontalAlignment="Left" Margin="343,54,0,0" TextWrapping="Wrap" Text="{Binding Path1, Mode=TwoWay}" VerticalAlignment="Top" Width="322"/>
-        <TextBox x:Name="Path2TextBox" HorizontalAlignment="Left" Margin="343,79,0,0" TextWrapping="Wrap" Text="{Binding Path2, Mode=TwoWay}" VerticalAlignment="Top" Width="322"/>
-        <TextBox x:Name="LogTextBox" HorizontalAlignment="Left" Margin="40,191,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="634" Height="171"/>
-        <Button x:Name="FocusClose2" Content="Button" HorizontalAlignment="Left" Margin="685,81,0,0" VerticalAlignment="Top" Click="FocusClose2_Click"/>
-        <Button x:Name="FocusFar2" Content="Button" HorizontalAlignment="Left" Margin="730,82,0,0" VerticalAlignment="Top" Click="FocusFar2_Click"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="279*"/>
+            <RowDefinition Height="305*"/>
+        </Grid.RowDefinitions>
+
+        <ListView x:Name="listBox1" 
+          Margin="10,10,10,35"  
+          TabIndex="1"  
+          MinWidth="150" 
+          MinHeight="150"  
+          UseLayoutRounding="False"  
+          ItemsSource="{Binding Path=.,Mode=TwoWay}" Grid.Row="0">
+
+            <ListView.View>
+                <GridView>
+                    <!-- Colonna Manufacturer -->
+                    <GridViewColumn Header="Manufacturer" DisplayMemberBinding="{Binding Manufacturer}" Width="Auto" />
+
+                    <!-- Colonna Device Name -->
+                    <GridViewColumn Header="Device Name" DisplayMemberBinding="{Binding DeviceName}" Width="Auto"/>
+
+                    <!-- Colonna Serial Number -->
+                    <GridViewColumn Header="Serial Number" DisplayMemberBinding="{Binding SerialNumber}" Width="Auto"/>
+
+                    <!-- Colonna Battery -->
+                    <GridViewColumn Header="Battery" DisplayMemberBinding="{Binding Battery}" Width="Auto" />
+
+                    <!-- Colonna Mode con ComboBox -->
+                    <GridViewColumn Header="Mode" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox IsEnabled="{Binding Mode.IsEnabled}" 
+                                  ItemsSource="{Binding Mode.Values}" 
+                                  SelectedValue="{Binding Path=Mode.Value}"
+                                HorizontalAlignment="Stretch" 
+                                          Width="Auto"
+                                          />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!-- Colonna Shutter Speed con ComboBox -->
+                    <GridViewColumn Header="Shutter Speed" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox IsEnabled="{Binding ShutterSpeed.IsEnabled}" 
+                                  ItemsSource="{Binding ShutterSpeed.Values}" 
+                                  SelectedValue="{Binding Path=ShutterSpeed.Value}" 
+                                  HorizontalAlignment="Stretch"
+                                          Width="Auto"
+                                  />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!-- Colonna FNumber con ComboBox -->
+                    <GridViewColumn Header="F Number" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox IsEnabled="{Binding FNumber.IsEnabled}" 
+                                  ItemsSource="{Binding FNumber.Values}" 
+                                  SelectedValue="{Binding Path=FNumber.Value}"
+                                  HorizontalAlignment="Stretch"
+                                          Width="Auto"
+                                  />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!-- Colonna IsoNumber con ComboBox -->
+                    <GridViewColumn Header="ISO Number" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox IsEnabled="{Binding IsoNumber.IsEnabled}" 
+                                  ItemsSource="{Binding IsoNumber.Values}" 
+                                  SelectedValue="{Binding Path=IsoNumber.Value}"
+                                  HorizontalAlignment="Stretch"
+                                          Width="Auto"
+                                  />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!-- Colonna Focus Mode con ComboBox -->
+                    <GridViewColumn Header="Focus Mode" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox IsEnabled="{Binding FocusMode.IsEnabled}" 
+                                  ItemsSource="{Binding FocusMode.Values}" 
+                                  SelectedValue="{Binding Path=FocusMode.Value}"
+                                  HorizontalAlignment="Stretch"
+                                          Width="Auto"
+                                  />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!-- Colonna Focus Mode con ComboBox -->
+                    <GridViewColumn Header="Focus" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <!-- Focus-100 -->
+                                    <Button x:Name="FocusNear100"  
+                                    Content="Focus-100" 
+                                    Click="FocusNear100_Click" 
+                                    Margin="2" />
+
+                                    <!-- Focus-10 -->
+                                    <Button x:Name="FocusNear10" 
+                                    Content="Focus-10"      
+                                    Margin="2" Click="FocusNear10_Click" />
+
+                                    <!-- Focus-1 -->
+                                    <Button x:Name="FocusNear1" 
+                                    Content="Focus-1" 
+                                    Margin="2" Click="FocusNear1_Click" />
+
+                                    <!-- Focus+1 -->
+                                    <Button x:Name="FocusFar1"
+                                    Content="Focus+1" 
+                                    Margin="2" Click="FocusFar1_Click" />
+
+                                    <!-- Focus+10 -->
+                                    <Button x:Name="FocusFar10"
+                                    Content="Focus+10" 
+                                    Margin="2" Click="FocusFar10_Click" />
+
+                                    <!-- Focus+100 -->
+                                    <Button x:Name="FocusFar100"
+                                    Content="Focus+100"
+                                    Margin="2" Click="FocusFar100_Click" />
+
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+
+                    <GridViewColumn Header="Capture" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="CaptureBtn"
+                                     Content="Capture"
+                                     Margin="2" Click="CaptureBtn_Click"  />
+                                    <Button x:Name="BulbStartBtn"
+                                    Content="Bulb start"
+                                    Margin="2" Click="BulbStartBtn_Click"   />
+                                    <Button x:Name="BulbEndBtn"
+                                    Content="Bulb end"
+                                    Margin="2" Click="BulbEndBtn_Click"   />
+                                    <Button x:Name="BulbCustomBtn"
+                                    Content="Bulb exposure"
+                                    Margin="2" Click="BulbCustomBtn_Click"    />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+
+                    <GridViewColumn Header="PC Mode" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="LockBtn"
+                                    Content="Lock"
+                                    Margin="2" Click="LockBtn_Click"   />
+                                    <Button x:Name="UnlockBtn"
+                                    Content="Unlock"
+                                    Margin="2" Click="UnlockBtn_Click"  />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+
+                    <GridViewColumn Header="LV Mode" Width="Auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="LVModeBtn"
+                                    Content="LV ON"
+                                    Margin="2" Click="LVModeBtn_Click"    />
+                                    <Button x:Name="LVModeStopBtn"
+                                    Content="LV OFF"
+                                    Margin="2" Click="LVModeStopBtn_Click"    />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+
+
+
+
+
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+
+
+
+
+        <Grid Height="279" VerticalAlignment="Bottom" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="487*"/>
+                <ColumnDefinition Width="537*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Height="Auto" Width="Auto" Margin="10,0,414,12" VerticalAlignment="Bottom" Grid.ColumnSpan="2" Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="LogTextBox" Margin="10,10,10,10" Text="CameraControl logs" Grid.Column="0" MinHeight="200" MinWidth="200" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" />
+                <TextBox x:Name="serverLogTextBox" Margin="10" Text="{Binding logHistory,Mode=OneWay}" Grid.Column="1" MinHeight="200" MinWidth="200" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+            </Grid>
+
+            <Grid Margin="0,0,10,10" HorizontalAlignment="Right" Width="252" Height="200" VerticalAlignment="Bottom" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="*"/>
+
+                </Grid.RowDefinitions>
+                <TextBlock  Text="Download mode"  Grid.Row="0" Grid.Column="0" />
+                <ComboBox x:Name="downloadComboBox" Grid.Row="0"  Grid.Column="1"  SelectedIndex="{Binding downloadMode}" SelectionChanged="downloadComboBox_SelectionChanged">
+                    <ComboBoxItem Content="PC only"/>
+                    <ComboBoxItem Content="PC+Camera"/>
+                    <ComboBoxItem Content="Camera only"/>
+                </ComboBox>
+                <TextBlock  Text="Bulb time (ms)"  Grid.Row="1" Grid.Column="0" />
+                <TextBox x:Name="BulbTimeTextBox"  Text="10000" InputScope="Number" PreviewTextInput="NumericTextBox_PreviewTextInput"  Grid.Row="1" Grid.Column="1"   />
+                <TextBlock Text="Port"  Grid.Row="2"  Grid.Column="0" />
+                <TextBox x:Name="portTextBox" Text="7000" Grid.Column="2"  Grid.Row="2" />
+                <CheckBox x:Name="darkThemeChkBox" Content="Dark theme" IsChecked="True" Click="darkThemeChkBox_Click" Grid.Row="3" Grid.Column="0" />
+                <CheckBox x:Name="ServerRunningChkBox" Content="Server running"  IsEnabled="False"  IsChecked="{Binding isRunning, Mode=OneWay}"  Grid.Row="3" Grid.Column="1" />
+                <Button x:Name="startServerBtn" Content="Start server"  Margin="5"  Click="startServerBtn_Click" Grid.Row="4" Grid.Column="0" IsEnabled="{Binding isNotRunning, Mode=OneWay}"/>
+                <Button x:Name="stopServerBtn" Content="Stop server" Margin="5" Click="stopServerBtn_Click"  Grid.Row="4" Grid.Column="1" IsEnabled="{Binding isRunning, Mode=OneWay}" />
+            </Grid>
+
+        </Grid>
     </Grid>
 </Window>

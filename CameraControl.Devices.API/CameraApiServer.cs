@@ -542,7 +542,7 @@ namespace CameraControl.Devices.API
                         {
 
                             int value = Convert.ToInt16(context.Request.QueryString[commands.valuestring]);
-                            value = Math.Max(-100, Math.Min(100, value));
+                            //value = Math.Max(-100, Math.Min(100, value));
 
                             FocusRoutine(device, value);
                             SendResponse(context, ok_string, plain_ct);

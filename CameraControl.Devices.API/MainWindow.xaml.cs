@@ -15,9 +15,17 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Forms;
 using CameraControl.Devices.Classes;
+using System.Net;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using Microsoft.Extensions.DependencyInjection;
+using System.Timers;
+using System.Drawing;
+using CameraControl.Devices.Nikon;
+using System.Reflection;
+using MaterialDesignThemes.Wpf;
+using System.Linq.Expressions;
 
 
 namespace CameraControl.Devices.API
@@ -27,75 +35,61 @@ namespace CameraControl.Devices.API
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private string _Path1;
-        private string _Path2;
-
-        private int _Port1;
-        private int _Port2;
+        private string _savePath;
+        private int _serverPort;
+        private int _downloadMode;
 
 
-        public string Path1
+        public string savePath
         {
 
             get
             {
-                return _Path1;
+                return _savePath;
             }
             set
             {
-                _Path1 = value;
+                _savePath = value;
                 OnPropertyChanged();
             }
         }
 
-        public string Path2
+        public int downloadMode
         {
 
             get
             {
-                return _Path2;
+                return _downloadMode;
             }
             set
             {
-                _Path2 = value;
+                _downloadMode = value;
                 OnPropertyChanged();
             }
         }
 
-        public int Port1
-        {
-            get
-            {
-                return _Port1;
-            }
-            set
-            {
-                _Port1 = value;
-                OnPropertyChanged();
-            }
-        }
-        public int Port2
-        {
 
+        public int serverPort
+        {
             get
             {
-                return _Port2;
+                return _serverPort;
             }
             set
             {
-                _Port2 = value;
+                _serverPort = value;
                 OnPropertyChanged();
             }
         }
+
 
 
         public Settings()
         {
 
-            Path1 = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "\\Camera1";
-            Path2 = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "\\Camera2";
-            Port1 = 7000;
-            Port2 = 7001;
+            savePath = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "\\Camera1";
+            serverPort = 7000;
+            downloadMode = 1;
 
         }
         protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -104,49 +98,65 @@ namespace CameraControl.Devices.API
         }
 
 
+
+
     }
+
+
 
     /// <summary>
     /// Logica di interazione per MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        public CameraDeviceManager DeviceManager1 { get; set; }
-      //  public CameraDeviceManager DeviceManager2 { get; set; }
-
+        private CameraApiServer _apiServer;
+        public CameraDeviceManager DeviceManager { get; set; }
         public Settings settings;
+        private Logger _logger;
 
-        public MainWindow()
+      
+        private readonly PaletteHelper _paletteHelper = new PaletteHelper();
+
+
+    public MainWindow()
         {
-            settings = new Settings();
-            this.DataContext = settings;
 
-            DeviceManager1 = new CameraDeviceManager();
-            DeviceManager1.CameraSelected += DeviceManager_CameraSelected;
-            DeviceManager1.CameraConnected += DeviceManager_CameraConnected;
-            DeviceManager1.PhotoCaptured += DeviceManager_PhotoCaptured;
-            DeviceManager1.CameraDisconnected += DeviceManager_CameraDisconnected;
+            _logger = new Logger(Path.GetDirectoryName(Assembly.GetExecutingAssembly().FullName) + "log.txt");
+            settings = new Settings();
+            DeviceManager = new CameraDeviceManager();
+            DeviceManager.UseExperimentalDrivers = true;
+
+            //DeviceManager.AddFakeCamera();
+
+            DeviceManager.CameraSelected += DeviceManager_CameraSelected;
+            DeviceManager.CameraConnected += DeviceManager_CameraConnected;
+            DeviceManager.PhotoCaptured += DeviceManager_PhotoCaptured;
+            DeviceManager.CameraDisconnected += DeviceManager_CameraDisconnected;
+
             // For experimental Canon driver support- to use canon driver the canon sdk files should be copied in application folder
-            DeviceManager1.UseExperimentalDrivers = true;
-            DeviceManager1.DisableNativeDrivers = false;
-            /*
-            DeviceManager2 = new CameraDeviceManager();
-            DeviceManager2.CameraSelected += DeviceManager_CameraSelected;
-            DeviceManager2.CameraConnected += DeviceManager_CameraConnected;
-            DeviceManager2.PhotoCaptured += DeviceManager_PhotoCaptured;
-            DeviceManager2.CameraDisconnected += DeviceManager_CameraDisconnected;
-            // For experimental Canon driver support- to use canon driver the canon sdk files should be copied in application folder
-            DeviceManager2.UseExperimentalDrivers = true;
-            DeviceManager2.DisableNativeDrivers = false;
-            */
+            DeviceManager.UseExperimentalDrivers = true;
+            DeviceManager.DisableNativeDrivers = false;
+
             InitializeComponent();
+
             Log.LogError += Log_LogDebug;
             Log.LogDebug += Log_LogDebug;
             Log.LogInfo += Log_LogDebug;
 
-            InitializeComponent();
+
+            listBox1.DataContext = DeviceManager.ConnectedDevices;
+
+            serverLogTextBox.DataContext = _logger;
+            downloadComboBox.DataContext = settings;
+
+
+            DeviceManager.ConnectToCamera();
+
+            StartServer();
 
         }
+
+
 
         void Log_LogDebug(LogEventArgs e)
         {
@@ -172,106 +182,82 @@ namespace CameraControl.Devices.API
             }
         }
 
-        private void RefreshDisplay()
-        {
-            // Metodo che aggiorna l'interfaccia utente
-            Action method = delegate
-            {
-                // Supponiamo che cmb_cameras sia un ComboBox
-                DevicesComboBox1.Items.Clear();
-                DevicesComboBox2.Items.Clear();
-
-                foreach (ICameraDevice cameraDevice in DeviceManager1.ConnectedDevices)
-                {
-                    DevicesComboBox1.Items.Add(cameraDevice);
-                    DevicesComboBox2.Items.Add(cameraDevice);
-                }
-
-                DevicesComboBox1.DisplayMemberPath = "DeviceName"; // WPF usa DisplayMemberPath invece di DisplayMember
-                DevicesComboBox1.SelectedItem = DeviceManager1.SelectedCameraDevice;
-
-                //DevicesComboBox2.DisplayMemberPath = "DeviceName"; // WPF usa DisplayMemberPath invece di DisplayMember
-                //DevicesComboBox2.SelectedItem = DeviceManager2.SelectedCameraDevice;
-
-               /* if (DeviceManager1.SelectedCameraDevice != null)
-                {
-                    DeviceManager1.SelectedCameraDevice.CaptureInSdRam = true;
-                    // Verifica se la fotocamera supporta il live view
-                    btn_liveview.IsEnabled = DeviceManager1.SelectedCameraDevice.GetCapability(CapabilityEnum.LiveView);
-                }*/
-            };
-
-            // Verifica se siamo nel thread dell'interfaccia utente
-            if (DevicesComboBox1.Dispatcher.CheckAccess())
-            {
-                // Se siamo nel thread UI, esegui direttamente il metodo
-                method.Invoke();
-            }
-            else
-            {
-                // Se siamo in un thread diverso, invoca il metodo nel UI thread
-                DevicesComboBox1.Dispatcher.Invoke(method);
-            }
-
-            if (DevicesComboBox2.Dispatcher.CheckAccess())
-            {
-                // Se siamo nel thread UI, esegui direttamente il metodo
-                method.Invoke();
-            }
-            else
-            {
-                // Se siamo in un thread diverso, invoca il metodo nel UI thread
-                DevicesComboBox2.Dispatcher.Invoke(method);
-            }
-        }
-
         void DeviceManager_CameraSelected(ICameraDevice oldcameraDevice, ICameraDevice newcameraDevice)
         {
-            // Metodo che aggiorna l'interfaccia utente
-           /* Action method = delegate
-            {
-                // Supponiamo che tu abbia un pulsante chiamato btnLiveView
-                btnLiveView.IsEnabled = newcameraDevice.GetCapability(CapabilityEnum.LiveView);
-            };
 
-            // Verifica se siamo nel thread dell'interfaccia utente
-            if (btnLiveView.Dispatcher.CheckAccess())
-            {
-                // Se siamo nel thread UI, esegui direttamente il metodo
-                method.Invoke();
-            }
-            else
-            {
-                // Se siamo in un thread diverso, invoca il metodo nel UI thread
-                btnLiveView.Dispatcher.Invoke(method);
-            }
-
-            */
         }
-
-
 
 
         void DeviceManager_CameraConnected(ICameraDevice cameraDevice)
         {
-            RefreshDisplay();
+            // RefreshDisplay();
+            if (_apiServer != null)
+            {
+                _apiServer.generateRouteHandlers(DeviceManager);
+            }
+
         }
 
 
         void DeviceManager_CameraDisconnected(ICameraDevice cameraDevice)
         {
-            RefreshDisplay();
+            // RefreshDisplay();
+
         }
 
+        public static string SanitizeFileName(string fileName)
+        {
+            // Ottieni i caratteri non validi per i percorsi file
+            char[] invalidChars = Path.GetInvalidFileNameChars();
+
+            // Rimuovi i caratteri non validi
+            StringBuilder sanitizedFileName = new StringBuilder(fileName);
+
+            foreach (char c in invalidChars)
+            {
+                sanitizedFileName.Replace(c.ToString(), string.Empty);
+            }
+
+            // Rimuovi spazi finali o iniziali
+            return sanitizedFileName.ToString().Trim();
+        }
+
+        public static string SanitizeFilePath(string filePath)
+        {
+            // Ottieni i caratteri non validi per i percorsi di file e directory
+            char[] invalidPathChars = Path.GetInvalidPathChars();
+
+            List<char> invalidPathList = new List<char>(invalidPathChars);
+            invalidPathList.Add(' '); //avoid spaces
+            invalidPathChars = invalidPathList.ToArray();
+
+            // Sanifica il percorso sostituendo i caratteri non validi
+            StringBuilder sanitizedPath = new StringBuilder(filePath);
+
+            // Rimuovi i caratteri non validi nei percorsi
+            foreach (char c in invalidPathChars)
+            {
+                sanitizedPath.Replace(c.ToString(), "_"); // Puoi sostituire con un trattino o altro
+            }
+
+
+            // Rimuovi spazi finali o iniziali
+            return sanitizedPath.ToString().Trim();
+        }
 
         private void PhotoCaptured(object o)
-        {/*
+        {
             PhotoCapturedEventArgs eventArgs = o as PhotoCapturedEventArgs;
             if (eventArgs == null)
                 return;
             try
             {
-                string fileName = Path.Combine(FolderForPhotos, Path.GetFileName(eventArgs.FileName));
+                // string test = SanitizeFilePath(Path.Combine(settings.savePath, "\\", eventArgs.CameraDevice.DeviceName, "_", eventArgs.CameraDevice.SerialNumber, "\\", Path.GetFileName(eventArgs.FileName)));
+                string filePath = settings.savePath + "\\" + SanitizeFilePath(eventArgs.CameraDevice.DeviceName + "_" + eventArgs.CameraDevice.SerialNumber + "\\");
+                string fileName = SanitizeFileName(Path.GetFileName(eventArgs.FileName));
+
+                fileName = filePath + fileName;
+
                 // if file exist try to generate a new filename to prevent file lost. 
                 // This useful when camera is set to record in ram the the all file names are same.
                 if (File.Exists(fileName))
@@ -285,16 +271,22 @@ namespace CameraControl.Devices.API
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(fileName));
                 }
-                eventArgs.CameraDevice.TransferFile(eventArgs.Handle, fileName);
-                // the IsBusy may used internally, if file transfer is done should set to false  
-                eventArgs.CameraDevice.IsBusy = false;
-                img_photo.ImageLocation = fileName;
+
+
+
+                if (settings.downloadMode !=  2)
+                {
+                    eventArgs.CameraDevice.TransferFile(eventArgs.Handle, fileName);
+                    // the IsBusy may used internally, if file transfer is done should set to false  
+                    eventArgs.CameraDevice.IsBusy = false;
+                }
+
             }
             catch (Exception exception)
             {
                 eventArgs.CameraDevice.IsBusy = false;
-                MessageBox.Show("Error download photo from camera :\n" + exception.Message);
-            }*/
+                //   MessageBox.Show("Error download photo from camera :Environment.NewLine" + exception.Message);
+            }
         }
         void DeviceManager_PhotoCaptured(object sender, PhotoCapturedEventArgs eventArgs)
         {
@@ -304,25 +296,311 @@ namespace CameraControl.Devices.API
         }
 
 
-        private void DevicesComboBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+
+
+        private void stopServerBtn_Click(object sender, RoutedEventArgs e)
         {
-            DeviceManager1.SelectedCameraDevice = DeviceManager1.ConnectedDevices[DevicesComboBox1.SelectedIndex];
+            _apiServer.Stop();
         }
 
-        private void DevicesComboBox2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void StartServer() {
+
+            _apiServer = new CameraApiServer(DeviceManager, this, _logger);
+            _apiServer.generateRouteHandlers(DeviceManager);
+            _apiServer.Start();
+            ServerRunningChkBox.DataContext = _apiServer;
+            startServerBtn.DataContext = _apiServer;
+            stopServerBtn.DataContext = _apiServer;
+
+        }
+        private void startServerBtn_Click(object sender, RoutedEventArgs e)
         {
-           // DeviceManager2.SelectedCameraDevice = DeviceManager2.ConnectedDevices[DevicesComboBox2.SelectedIndex];
+            StartServer();
         }
 
-        private void FocusFar2_Click(object sender, RoutedEventArgs e)
-        {
-            DeviceManager1.ConnectedDevices[0].Focus(100);
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {/*
+            base.OnClosing(e);
+            _apiServer?.Stop(); // Interrompe il server se attivo*/
         }
 
-        private void FocusClose2_Click(object sender, RoutedEventArgs e)
+        private async void FocusNear100_Click(object sender, RoutedEventArgs e)
         {
-            DeviceManager1.ConnectedDevices[0].Focus(-100);
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                await Task.Run(() =>
+                {
+                    if (deviceReady(device, 5))
+                        device.Focus(-100);
+                });
+            }
+        }
+
+        private async void FocusFar100_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                await Task.Run(() =>
+                {
+                    if (deviceReady(device, 5))
+                        device.Focus(100);
+                });
+            }
+        }
+
+        private async void FocusNear10_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                await Task.Run(() =>
+                {
+                    if (deviceReady(device, 5))
+                        device.Focus(-10);
+                });
+            }
+        }
+
+        private async void FocusNear1_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                await Task.Run(() =>
+                {
+                    if (deviceReady(device, 5))
+                        device.Focus(-1);
+                });
+            }
+        }
+
+        private async void FocusFar1_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                await Task.Run(() =>
+                {
+                    if (deviceReady(device, 5))
+                        device.Focus(1);
+                });
+            }
+        }
+
+        private async void FocusFar10_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                await Task.Run(() =>
+                {
+                    if (deviceReady(device, 5))
+                        device.Focus(10);
+                });
+            }
+        }
+
+        private async void CaptureBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+
+                await Task.Run(() =>
+                {
+                    if (deviceReady(device, 5))
+                        device.CapturePhoto();
+                                });
+
+
+            }
+        }
+
+        private async void BulbStartBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                await Task.Run(() =>
+                {
+                    if (deviceReady(device, 5))
+                    {
+
+                        device.IsBusy = true;
+                        device.LockCamera();
+                        device.StartBulbMode();
+                    }
+
+                });
+
+
+            }
+
+
+        }
+
+        private void BulbEndBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                // Ottieni il valore dal Tag
+                //int parameter = int.Parse(button.Tag.ToString());
+                device.EndBulbMode();
+
+            }
+        }
+
+        private async void LockBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                // Ottieni il valore dal Tag
+                //int parameter = int.Parse(button.Tag.ToString());
+                await Task.Run(() =>
+                {
+                    if (deviceReady(device, 5))
+                        device.LockCamera();
+                });
+
+                
+
+            }
+        }
+
+        private async void UnlockBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                await Task.Run(() =>
+                {
+                    if (deviceReady(device, 5))
+                        device.UnLockCamera();
+                });
+
+            }
+        }
+
+        private void BulbCustomBtn_Click(object sender, RoutedEventArgs e)
+        {
+
+            BulbCapture(sender, e, Convert.ToInt32(BulbTimeTextBox.Text));
+
+        }
+
+        private async void BulbCapture(object sender, RoutedEventArgs e, int time)
+        {
+
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                
+                if (deviceReady(device, 5))
+                {
+                    device.StartBulbMode();
+                    await Task.Delay(time);
+                    device.EndBulbMode();
+                }
+            }
+
+        }
+
+        private void NumericTextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            // Consente solo numeri e simboli (es. per i numeri decimali)
+            e.Handled = !System.Text.RegularExpressions.Regex.IsMatch(e.Text, @"^[0-9]+$");
+        }
+
+        private async void LVModeBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+
+                // device.StartLiveView();
+                LiveViewWindow liveViewWindow = new LiveViewWindow(device);
+
+                liveViewWindow.Show();
+
+
+            }
+        }
+
+
+
+        private void LVModeStopBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
+            {
+                // Avvia un Task direttamente con una lambda
+                device.StopLiveView();
+
+            }
+        }
+
+        private bool deviceReady(ICameraDevice device, int tries)
+        {
+
+            for (int i = 0; i < tries; i++)
+            {
+                if (!device.IsBusy) return true;
+                Thread.Sleep(100);
+            }
+
+            return false;
+
+        }
+
+
+
+        private void darkThemeChkBox_Click(object sender, RoutedEventArgs e)
+        {
+            ITheme theme = _paletteHelper.GetTheme();
+
+            if (darkThemeChkBox.IsChecked == true)
+            {
+
+                theme.SetBaseTheme(Theme.Dark);
+                _paletteHelper.SetTheme(theme);
+            }
+
+            else
+
+            {
+
+                theme.SetBaseTheme(Theme.Light);
+                _paletteHelper.SetTheme(theme);
+            }
+        }
+
+        private void downloadComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+            try
+            {
+                foreach (ICameraDevice device in DeviceManager.ConnectedDevices)
+                {
+
+                    switch (downloadComboBox.SelectedIndex)
+                    {
+
+                        case 0:
+
+                            device.CaptureInSdRam = true;
+
+                            break;
+                        case 1:
+                            device.CaptureInSdRam = false;
+                            break;
+                        case 2:
+                            device.CaptureInSdRam = false;
+                            break;
+                        default:
+                            device.CaptureInSdRam = true;
+                            break;
+
+                    }
+
+                }
+
+
+            }
+            catch { }
+            
+
         }
     }
+
 }
 
