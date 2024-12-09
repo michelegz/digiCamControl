@@ -161,6 +161,7 @@
     <Compile Include="Custom\DeviceDescription.cs" />
     <Compile Include="Custom\DeviceProperty.cs" />
     <Compile Include="Custom\DevicePropertyValue.cs" />
+    <Compile Include="EDSDK.cs" />
     <Compile Include="GoPro\GDeviceInformation.cs" />
     <Compile Include="GoPro\GoPro9Camera.cs" />
     <Compile Include="GoPro\GoProBaseCamera.cs" />
@@ -176,6 +177,7 @@
     <Compile Include="Nikon\NikonD810.cs" />
     <Compile Include="Nikon\NikonD750.cs" />
     <Compile Include="Nikon\NikonD7500.cs" />
+    <Compile Include="Nikon\NikonZ.cs" />
     <Compile Include="Nikon\NikonZ7.cs" />
     <Compile Include="Nikon\NikonZ6.cs" />
     <Compile Include="Nikon\NikonD850.cs" />

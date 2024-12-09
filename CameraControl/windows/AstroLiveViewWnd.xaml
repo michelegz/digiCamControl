@@ -52,7 +52,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <Button Content="{T:TranslateExtension LabelStartLiveView}" Command="{Binding StartLiveViewCommand}" Margin="2" />
+                <Button Content="{T:TranslateExtension LabelStartLiveView}" Command="{Binding StartLiveViewCommand}" Margin="2" Click="Button_Click" />
                 <Button  Content="{T:TranslateExtension LabelStopLiveView}" Grid.Row="0" Grid.Column="1" Command="{Binding StopLiveViewCommand}" Margin="2"  />
             </Grid>
         </GroupBox>
