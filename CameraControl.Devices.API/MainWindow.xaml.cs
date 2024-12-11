@@ -26,6 +26,8 @@ using CameraControl.Devices.Nikon;
 using System.Reflection;
 using MaterialDesignThemes.Wpf;
 using System.Linq.Expressions;
+using System.Windows.Forms; // Aggiungi questo namespace
+using MessageBox = System.Windows.MessageBox; // Per evitare conflitti con System.Windows.Forms.MessageBox
 
 
 namespace CameraControl.Devices.API
@@ -36,7 +38,7 @@ namespace CameraControl.Devices.API
         public event PropertyChangedEventHandler PropertyChanged;
 
         private string _savePath;
-        private int _serverPort;
+        private string _serverPort;
         private int _downloadMode;
 
 
@@ -69,7 +71,7 @@ namespace CameraControl.Devices.API
         }
 
 
-        public int serverPort
+        public string serverPort
         {
             get
             {
@@ -88,7 +90,7 @@ namespace CameraControl.Devices.API
         {
 
             savePath = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "\\Camera1";
-            serverPort = 7000;
+            serverPort = "7000";
             downloadMode = 1;
 
         }
@@ -96,9 +98,6 @@ namespace CameraControl.Devices.API
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
-
-
-
 
     }
 
@@ -113,6 +112,7 @@ namespace CameraControl.Devices.API
         public CameraDeviceManager DeviceManager { get; set; }
         public Settings settings;
         private Logger _logger;
+        private List<LiveViewWindow> liveViewWindows;
 
       
         private readonly PaletteHelper _paletteHelper = new PaletteHelper();
@@ -147,7 +147,9 @@ namespace CameraControl.Devices.API
             listBox1.DataContext = DeviceManager.ConnectedDevices;
 
             serverLogTextBox.DataContext = _logger;
+            portTextBox.DataContext = settings;
             downloadComboBox.DataContext = settings;
+            savePathTextBox.DataContext = settings;
 
 
             DeviceManager.ConnectToCamera();
@@ -508,25 +510,59 @@ namespace CameraControl.Devices.API
             if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
             {
 
-                // device.StartLiveView();
-                LiveViewWindow liveViewWindow = new LiveViewWindow(device);
+                if (liveViewWindows == null || liveViewWindows.Count == 0)
+                {
+                    liveViewWindows = new List<LiveViewWindow>();
+                    LiveViewWindow lv = new LiveViewWindow(device,liveViewWindows);
+                    liveViewWindows.Add(lv);
+                    lv.Show();
+                }
 
-                liveViewWindow.Show();
+                else {
+
+                    foreach (LiveViewWindow lv in liveViewWindows) {
+
+                        if (device == lv.device) {
+                            
+                            lv.Activate();
+                        
+                        }
+                    
+                    }
+                
+                
+                }
 
 
             }
         }
-
-
+ 
 
         private void LVModeStopBtn_Click(object sender, RoutedEventArgs e)
         {
             if (sender is System.Windows.Controls.Button button && button.DataContext is ICameraDevice device)
             {
-                // Avvia un Task direttamente con una lambda
-                device.StopLiveView();
+
+                foreach (LiveViewWindow lv in liveViewWindows)
+                {
+
+                    if (device == lv.device)
+                    {
+                        closeLiveView(lv);
+                        break;
+                    }
+
+                }
 
             }
+        }
+
+        public void closeLiveView(LiveViewWindow liveViewWindow) { 
+        
+            liveViewWindow.Close();
+            liveViewWindow.device.StopLiveView();
+            liveViewWindows.Remove(liveViewWindow);
+            
         }
 
         private bool deviceReady(ICameraDevice device, int tries)
@@ -600,6 +636,28 @@ namespace CameraControl.Devices.API
             
 
         }
+
+        private void savePathBtn_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFolderDialog();
+        }
+
+        public void OpenFolderDialog()
+        {
+            using (var dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "Seleziona una cartella";
+                dialog.ShowNewFolderButton = true; // Mostra il pulsante per creare una nuova cartella
+                dialog.RootFolder = Environment.SpecialFolder.Desktop; // Cartella iniziale
+
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    string selectedPath = dialog.SelectedPath;
+                    settings.savePath = selectedPath;
+                }
+            }
+        }
+
     }
 
 }

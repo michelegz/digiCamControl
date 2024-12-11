@@ -585,6 +585,7 @@ namespace CameraControl.Devices
             Log.Debug("Connection device start" );
             try
             {
+
                 var devices = PortableDeviceCollection.Instance.Devices;
                 foreach (PortableDevice portableDevice in devices)
                 {

@@ -229,7 +229,7 @@
                 <TextBox x:Name="serverLogTextBox" Margin="10" Text="{Binding logHistory,Mode=OneWay}" Grid.Column="1" MinHeight="200" MinWidth="200" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
             </Grid>
 
-            <Grid Margin="0,0,10,10" HorizontalAlignment="Right" Width="252" Height="200" VerticalAlignment="Bottom" Grid.Column="1">
+            <Grid Margin="0,0,10,0" Height="250" VerticalAlignment="Center" Grid.Column="1" Cursor="" HorizontalAlignment="Right" Width="252">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
@@ -239,23 +239,26 @@
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
                     <RowDefinition Height="*"/>
 
                 </Grid.RowDefinitions>
-                <TextBlock  Text="Download mode"  Grid.Row="0" Grid.Column="0" />
-                <ComboBox x:Name="downloadComboBox" Grid.Row="0"  Grid.Column="1"  SelectedIndex="{Binding downloadMode}" SelectionChanged="downloadComboBox_SelectionChanged">
+                <Button x:Name="savePathBtn" Content="Browse"  Margin="5"   Grid.Row="0" Grid.Column="0" IsEnabled="{Binding isNotRunning, Mode=OneWay}" Click="savePathBtn_Click"/>
+                <TextBox x:Name="savePathTextBox" Text="{Binding savePath,Mode=TwoWay}" Grid.Column="1"  Grid.Row="0" />
+                <TextBlock  Text="Download mode"  Grid.Row="1" Grid.Column="0" />
+                <ComboBox x:Name="downloadComboBox" Grid.Row="1"  Grid.Column="1"  SelectedIndex="{Binding downloadMode}" SelectionChanged="downloadComboBox_SelectionChanged">
                     <ComboBoxItem Content="PC only"/>
                     <ComboBoxItem Content="PC+Camera"/>
                     <ComboBoxItem Content="Camera only"/>
                 </ComboBox>
-                <TextBlock  Text="Bulb time (ms)"  Grid.Row="1" Grid.Column="0" />
-                <TextBox x:Name="BulbTimeTextBox"  Text="10000" InputScope="Number" PreviewTextInput="NumericTextBox_PreviewTextInput"  Grid.Row="1" Grid.Column="1"   />
-                <TextBlock Text="Port"  Grid.Row="2"  Grid.Column="0" />
-                <TextBox x:Name="portTextBox" Text="7000" Grid.Column="2"  Grid.Row="2" />
-                <CheckBox x:Name="darkThemeChkBox" Content="Dark theme" IsChecked="True" Click="darkThemeChkBox_Click" Grid.Row="3" Grid.Column="0" />
-                <CheckBox x:Name="ServerRunningChkBox" Content="Server running"  IsEnabled="False"  IsChecked="{Binding isRunning, Mode=OneWay}"  Grid.Row="3" Grid.Column="1" />
-                <Button x:Name="startServerBtn" Content="Start server"  Margin="5"  Click="startServerBtn_Click" Grid.Row="4" Grid.Column="0" IsEnabled="{Binding isNotRunning, Mode=OneWay}"/>
-                <Button x:Name="stopServerBtn" Content="Stop server" Margin="5" Click="stopServerBtn_Click"  Grid.Row="4" Grid.Column="1" IsEnabled="{Binding isRunning, Mode=OneWay}" />
+                <TextBlock  Text="Bulb capture time (ms)"  Grid.Row="2" Grid.Column="0" />
+                <TextBox x:Name="BulbTimeTextBox"  Text="10000" InputScope="Number" PreviewTextInput="NumericTextBox_PreviewTextInput"  Grid.Row="2" Grid.Column="1"   />
+                <TextBlock Text="Port"  Grid.Row="3"  Grid.Column="0" />
+                <TextBox x:Name="portTextBox" Text="{Binding serverPort,Mode=TwoWay}" Grid.Column="2"  Grid.Row="3" />
+                <CheckBox x:Name="darkThemeChkBox" Content="Dark theme" IsChecked="True" Click="darkThemeChkBox_Click" Grid.Row="4" Grid.Column="0" />
+                <CheckBox x:Name="ServerRunningChkBox" Content="Server running"  IsEnabled="False"  IsChecked="{Binding isRunning, Mode=OneWay}"  Grid.Row="4" Grid.Column="1" />
+                <Button x:Name="startServerBtn" Content="Start server"  Margin="5"  Click="startServerBtn_Click" Grid.Row="5" Grid.Column="0" IsEnabled="{Binding isNotRunning, Mode=OneWay}"/>
+                <Button x:Name="stopServerBtn" Content="Stop server" Margin="5" Click="stopServerBtn_Click"  Grid.Row="5" Grid.Column="1" IsEnabled="{Binding isRunning, Mode=OneWay}" />
             </Grid>
 
         </Grid>

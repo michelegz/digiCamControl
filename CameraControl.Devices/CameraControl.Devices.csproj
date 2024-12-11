@@ -108,6 +108,12 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>LocalServer.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Interop.WIA">
       <HintPath>..\refs\Interop.WIA.dll</HintPath>
@@ -292,6 +298,9 @@
     <PackageReference Include="WebSocketSharp">
       <Version>1.0.3-rc11</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="LocalServer.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

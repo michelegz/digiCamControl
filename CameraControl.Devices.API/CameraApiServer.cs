@@ -83,7 +83,7 @@ namespace CameraControl.Devices.API
         {
             _logger = logger;
             commands = new Commands();
-            listener_url = "http://localhost:" + mainWindow.portTextBox.Text + "/";
+            listener_url = "http://localhost:" + mainWindow.settings.serverPort + "/";
             _deviceManager = deviceManager;
             generateRouteHandlers(deviceManager);
         }

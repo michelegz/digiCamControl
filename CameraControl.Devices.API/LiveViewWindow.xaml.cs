@@ -24,14 +24,19 @@ namespace CameraControl.Devices.API
     public partial class LiveViewWindow : Window
     {
 
-        private ICameraDevice _device;
-        public LiveViewWindow(ICameraDevice device)
-        {
-            this.Title = device.DeviceName + device.SerialNumber;
-            _device = device;
-            StartLiveView(_device);
+        public ICameraDevice device;
+        private List<LiveViewWindow> _liveViewWindows;
 
+        public LiveViewWindow(ICameraDevice _device, List<LiveViewWindow> liveViewWindows)
+        {
+            device = _device;
+            _liveViewWindows = liveViewWindows;
+           
             InitializeComponent();
+
+            StartLiveView(device);
+
+            this.Title = device.DeviceName + " " + device.SerialNumber;
         }
 
         private async void StartLiveView(ICameraDevice device)
@@ -131,7 +136,8 @@ namespace CameraControl.Devices.API
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            _device.StopLiveView();
+            device.StopLiveView();
+            _liveViewWindows.Remove(this);
         }
     }
 }
