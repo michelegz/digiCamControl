@@ -14,9 +14,9 @@ namespace CameraControl.Core.Wpf
             bool flag1 = source.Format == PixelFormats.Pbgra32 || source.Format == PixelFormats.Prgba64 || source.Format == PixelFormats.Prgba128Float;
             int num1 = (int)destRect.Width;
             int num2 = (int)destRect.Height;
-            using (BitmapContext bitmapContext1 = WriteableBitmapContextExtensions.GetBitmapContext(source, ReadWriteMode.ReadOnly))
+            using (BitmapContext bitmapContext1 = source.GetBitmapContext(ReadWriteMode.ReadWrite))
             {
-                using (BitmapContext bitmapContext2 = WriteableBitmapContextExtensions.GetBitmapContext(bmp))
+                using (BitmapContext bitmapContext2 = bmp.GetBitmapContext())
                 {
                     int width1 = bitmapContext1.Width;
                     int width2 = bitmapContext2.Width;
