@@ -797,7 +797,7 @@ namespace CameraControl.Devices
         }
 
 
-        private void NewCameraConnected(ICameraDevice cameraDevice)
+        public void NewCameraConnected(ICameraDevice cameraDevice)
         {
             const string usbPrefix = "\\\\?\\usb";
 
